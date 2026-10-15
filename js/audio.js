@@ -88,6 +88,11 @@
       const notes = [659, 587, 523, 587, 659, 659, 659, 0, 587, 587, 587, 0, 659, 784, 784];
       notes.forEach((n, i) => { if (n) tone(n, 0.5, { delay: i * 0.32, vol: 0.12, type: 'triangle', attack: 0.04 }); });
     },
+    clap() { for (let i = 0; i < 14; i++) noise(0.05, { delay: i * 0.09 + Math.random() * 0.04, freq: 1400 + Math.random() * 900, q: 1.2, vol: 0.35 }); },
+    suck() { for (let i = 0; i < 6; i++) tone(240, 0.12, { delay: i * 0.28, slideTo: 160, vol: 0.18 }); },
+    shutter() { noise(0.05, { freq: 3000, vol: 0.5 }); noise(0.08, { freq: 1500, vol: 0.4, delay: 0.07 }); tone(1800, 0.05, { vol: 0.1, type: 'square' }); },
+    note(i) { const f = [523, 659, 784, 1046, 880, 587][i % 6]; tone(f, 0.35, { vol: 0.22, type: 'triangle' }); },
+    aww() { tone(700, 0.5, { slideTo: 420, vol: 0.12, type: 'triangle' }); },
     clop() { tone(900, 0.04, { vol: 0.12, type: 'square' }); tone(700, 0.04, { vol: 0.1, type: 'square', delay: 0.09 }); },
   };
 
