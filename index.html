@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="build" content="pony-pals-v1.1">
+<meta name="build" content="pony-pals-v2.0">
 <title>Pony Pals: My Little Stable</title>
 <meta name="description" content="A gentle pony care game for little ones. Feed, brush, ride and tuck in your pony.">
 <meta name="theme-color" content="#ffc2dc">
@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=1.1">
+<link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
 <div id="app">
@@ -37,10 +37,16 @@
       <g class="day"><rect x="4" y="4" width="92" height="72" rx="6" fill="#8fd8ff"/><circle cx="74" cy="22" r="10" fill="#fde047"/>
         <g fill="#fff"><circle cx="24" cy="22" r="7"/><circle cx="32" cy="20" r="9"/><circle cx="40" cy="23" r="6"/></g>
         <path d="M4 60Q30 40 56 56T96 50V76H4Z" fill="#86efac"/></g>
+      <g class="wx wx-grey"><rect x="4" y="4" width="92" height="72" fill="#94a3b8"/><g fill="#e2e8f0"><circle cx="26" cy="20" r="9"/><circle cx="38" cy="18" r="11"/><circle cx="70" cy="22" r="10"/><circle cx="80" cy="20" r="8"/></g><path d="M4 62Q30 48 56 58T96 54V76H4Z" class="wx-ground" fill="#64a36f"/></g>
+      <g class="wx wx-rain" stroke="#1d4ed8" stroke-width="1.6" stroke-linecap="round"><path d="M14 30l-3 8M30 36l-3 8M46 28l-3 8M62 38l-3 8M78 30l-3 8M88 44l-3 8M22 52l-3 8M54 50l-3 8M72 56l-3 8"/></g>
+      <g class="wx wx-snow" fill="#fff"><circle cx="12" cy="30" r="2"/><circle cx="28" cy="40" r="1.6"/><circle cx="40" cy="26" r="2.2"/><circle cx="58" cy="36" r="1.8"/><circle cx="72" cy="28" r="2"/><circle cx="86" cy="40" r="1.6"/><circle cx="20" cy="56" r="2"/><circle cx="66" cy="54" r="2.2"/></g>
+      <g class="wx wx-leaves"><ellipse cx="20" cy="30" rx="3" ry="1.8" fill="#f97316"/><ellipse cx="44" cy="44" rx="3" ry="1.8" fill="#dc2626"/><ellipse cx="70" cy="34" rx="3" ry="1.8" fill="#f59e0b"/><ellipse cx="84" cy="52" rx="3" ry="1.8" fill="#ea580c"/></g>
       <path d="M50 4V76M4 40H96" stroke="#7c4a1e" stroke-width="5"/>
       <rect x="4" y="4" width="92" height="72" rx="6" fill="none" stroke="#7c4a1e" stroke-width="7"/>
       <rect x="0" y="72" width="100" height="8" rx="3" fill="#7c4a1e"/>
-    </svg></div>
+      <path class="wx wx-sill" d="M0 73q6-6 12 0t12 0 12 0 12 0 12 0 12 0 12 0 12 0 4 0v-3H0z" fill="#fff"/>
+    </svg><div class="sDeco spring springbox"><svg viewBox="0 0 100 24"><rect x="4" y="12" width="92" height="12" rx="3" fill="#b45309" stroke="#78350f" stroke-width="2"/><g stroke="#9d174d" stroke-width="1"><circle cx="16" cy="9" r="5" fill="#f9a8d4"/><circle cx="32" cy="6" r="5" fill="#fde047"/><circle cx="50" cy="8" r="5" fill="#c4b5fd"/><circle cx="68" cy="6" r="5" fill="#fff"/><circle cx="84" cy="9" r="5" fill="#f9a8d4"/></g></svg></div></div>
+    <div id="rosettes"></div>
     <div class="wallshoe" data-ico="shoe"></div>
     <div class="deco bunting"><svg viewBox="0 0 400 50" preserveAspectRatio="none"><path d="M0 4Q200 30 400 4" fill="none" stroke="#7c2d12" stroke-width="2"/>
       <g stroke-width="1.5"><path d="M20 8l8 26 9-24z" fill="#f472b6" stroke="#9d174d"/><path d="M70 13l8 26 9-24z" fill="#60a5fa" stroke="#1e3a8a"/><path d="M120 16l8 26 9-25z" fill="#facc15" stroke="#a16207"/><path d="M170 17l8 26 9-25z" fill="#4ade80" stroke="#166534"/><path d="M220 17l9 25 8-26z" fill="#c084fc" stroke="#6b21a8"/><path d="M270 15l9 25 8-26z" fill="#f472b6" stroke="#9d174d"/><path d="M320 12l9 25 8-26z" fill="#60a5fa" stroke="#1e3a8a"/><path d="M366 8l9 25 8-26z" fill="#facc15" stroke="#a16207"/></g></svg></div>
@@ -52,6 +58,10 @@
       <path d="M14 20h30M54 16h40M20 34h60M30 50h70M12 60h26M86 30h22" stroke="#fde68a" stroke-width="4" stroke-linecap="round"/>
       <path d="M38 6v64M84 6v64" stroke="#b45309" stroke-width="5"/></svg></div>
     <div class="deco flowers" data-ico="flowers"></div>
+    <div class="sDeco winter beamSnow"></div>
+    <div class="sDeco autumn pump1" data-ico="pumpkin"></div><div class="sDeco autumn pump2" data-ico="pumpkin"></div>
+    <div class="sDeco summer sunflower"><svg viewBox="0 0 64 64"><path d="M32 30v24" stroke="#16a34a" stroke-width="4"/><path d="M32 44c8-6 14-4 16 0-6 3-11 3-16 0z" fill="#4ade80"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(0 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(30 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(60 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(90 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(120 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(150 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(180 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(210 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(240 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(270 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(300 32 20)"/><ellipse cx="32" cy="8" rx="5" ry="10" fill="#facc15" stroke="#a16207" stroke-width="1.5" transform="rotate(330 32 20)"/><circle cx="32" cy="20" r="8" fill="#78350f"/><path d="M18 50h28l-4 12H22z" fill="#ea580c" stroke="#7c2d12" stroke-width="2"/></svg></div>
+    <div id="floorFlowers"></div>
     <div id="bucket"><svg viewBox="0 0 80 70"><path d="M8 18h64l-8 48H16z" fill="#60a5fa" stroke="#1e3a8a" stroke-width="4" stroke-linejoin="round"/><path d="M10 30h60" stroke="#1e3a8a" stroke-width="3"/><ellipse cx="40" cy="18" rx="32" ry="7" fill="#eab308" stroke="#1e3a8a" stroke-width="4"/><path d="M10 18C10 -4 70 -4 70 18" fill="none" stroke="#475569" stroke-width="3"/></svg></div>
     <div class="friend" id="foal"></div>
     <div class="friend" id="bunny"></div>
@@ -78,8 +88,9 @@
 </div>
 <div id="toastWord"></div>
 <noscript>Pony Pals needs JavaScript turned on.</noscript>
-<script src="js/art.js?v=1.1"></script>
-<script src="js/audio.js?v=1.1"></script>
-<script src="js/game.js?v=1.1"></script>
+<script src="js/art.js?v=2.0"></script>
+<script src="js/audio.js?v=2.0"></script>
+<script src="js/more.js?v=2.0"></script>
+<script src="js/game.js?v=2.0"></script>
 </body>
 </html>

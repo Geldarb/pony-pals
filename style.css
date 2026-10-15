@@ -259,3 +259,210 @@ svg{display:block}
 #shop .sub{margin:0}
 #play .count{background:#ffffffcc;border-radius:18px;padding:4px 8px}
 @media (orientation:landscape){#shop{flex-direction:row;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:8px}#shop .sub{width:100%}#shopPony{flex:0 0 auto}#shop .grid{flex:1 1 520px}}
+
+/* ================= v2: new features ================= */
+#sleepy{z-index:45}
+.pony .raincoat,.pony .prop{display:none}
+.has-raincoat .pony .raincoat{display:inline}
+.pony .rc{fill:#facc15;stroke:var(--ol);stroke-width:4;stroke-linejoin:round}
+.p-glasses .pony .prop-glasses,.p-crown .pony .prop-crown,.p-party .pony .prop-party,.p-flowers .pony .prop-flowers{display:inline}
+.tile .badge{position:absolute;top:-6px;right:-6px;min-width:30px;height:30px;padding:0 7px;border-radius:15px;background:#ef4444;color:#fff;font-weight:900;font-size:18px;display:grid;place-items:center;box-shadow:0 2px 0 #7f1d1d}
+.tile.empty .ico{opacity:.45}
+.tile.shake{animation:shake .4s}
+.glowmore .ico{background:#fef9c3}
+.tile .word.dark{color:#7e22ce;text-shadow:none}
+
+/* stable: rosettes, flowers, seasons, weather */
+#rosettes{position:absolute;left:5%;top:calc(11% + min(28vmin,30vw) * .8 + 14px);width:min(36vmin,34%);display:flex;flex-wrap:wrap;gap:2px;z-index:2}
+#rosettes span{width:min(8vmin,46px);aspect-ratio:1;animation:popin .5s backwards}
+#rosettes span:nth-child(2n){transform:rotate(8deg)}
+#floorFlowers{position:absolute;left:0;right:0;bottom:0;height:10%;z-index:3;pointer-events:none}
+#floorFlowers span{position:absolute;bottom:2px;width:min(7vmin,44px);transform-origin:50% 100%;animation:sway 3s ease-in-out infinite;animation-delay:var(--d)}
+.sDeco{position:absolute;display:none;pointer-events:none}
+#stage.s-autumn .sDeco.autumn,#stage.s-winter .sDeco.winter,#stage.s-spring .sDeco.spring,#stage.s-summer .sDeco.summer{display:block}
+.sDeco.pump1{right:4%;bottom:2%;width:13vmin;z-index:3}
+.sDeco.pump2{right:17%;bottom:1%;width:9vmin;z-index:3}
+.sDeco.sunflower{right:4%;bottom:3%;width:11vmin;z-index:3}
+.sDeco.springbox{left:4%;width:92%;top:94%}
+.sDeco.beamSnow{left:0;right:0;top:5%;height:12px;background:radial-gradient(circle at 10px 0,#fff 9px,transparent 10px) repeat-x;background-size:20px 12px;z-index:2}
+.win .wx{display:none}
+#stage.w-rain .win .wx-grey,#stage.w-rain .win .wx-rain,#stage.w-snow .win .wx-grey,#stage.w-snow .win .wx-snow{display:inline}
+#stage.w-snow .win .wx-ground,#stage.s-winter .win .wx-ground{fill:#f8fafc}
+#stage.w-snow .win .wx-sill,#stage.s-winter .win .wx-sill{display:inline}
+#stage.s-autumn:not(.w-snow) .win .wx-leaves{display:inline}
+.win .wx-rain{animation:rainfall .5s linear infinite}
+.win .wx-snow,.win .wx-leaves{animation:snowfall 3s linear infinite}
+@keyframes rainfall{from{transform:translateY(-8px)}to{transform:translateY(8px)}}
+@keyframes snowfall{0%{transform:translate(0,-10px)}50%{transform:translate(3px,0)}100%{transform:translate(0,10px)}}
+@keyframes sway{50%{transform:rotate(6deg)}}
+
+/* shared pony boxes */
+.pbox{position:relative;aspect-ratio:370/316;flex:0 0 auto}
+.pbox .pony{width:100%;height:100%;overflow:visible;transform-origin:50% 100%}
+.pbox.small{width:min(30vw,18vh,170px)}
+.pbox.mid{width:min(76vw,40vh,400px)}
+.pbox.big{width:min(72vw,32vh,380px);margin-top:50px}
+.sub.big svg{width:clamp(70px,18vmin,110px);height:clamp(70px,18vmin,110px)}
+.overlay .fx{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;pointer-events:none;z-index:20}
+.overlay .fx.heart{animation:floatUp 1.4s ease-out forwards}
+.overlay .fx.spark{animation:sparkle 1s ease-out forwards}
+.shoeRow{display:flex;gap:6px;justify-content:center;margin:6px 0}
+.shoeRow svg{width:clamp(44px,11vmin,64px);height:clamp(44px,11vmin,64px);animation:popin .5s backwards}
+.shoeRow svg:nth-child(2){animation-delay:.15s}.shoeRow svg:nth-child(3){animation-delay:.3s}
+.card{position:relative}
+.menuGrid,.rideGrid{max-width:900px}
+.rideGrid .card .pic.sq{width:80%}
+
+/* tricks: pony animations (work in the stable and in activity screens) */
+.t-bow .pony{animation:tbow 1.6s ease-in-out!important;transform-origin:30% 100%}
+.t-bow .pony .hd{animation:tbowhd 1.6s ease-in-out}
+.t-nod .pony .hd{animation:nod .35s ease-in-out 4}
+.t-wave .pony .leg-nf{animation:twave .5s ease-in-out 3}
+.t-spin .pony{animation:tspin 1.2s ease-in-out!important}
+.t-hop .pony{animation:thop 1s ease-out!important}
+.t-hop .pony .leg-nf,.t-hop .pony .leg-ff,.showjump .pony .leg-nf,.showjump .pony .leg-ff{animation:ttuck 1s}
+.t-dance .pony{animation:tdance .5s ease-in-out 4!important}
+.cuddle .pony{animation:squish .6s ease-in-out 2!important}
+@keyframes tbow{40%,70%{transform:rotate(7deg)}}
+@keyframes tbowhd{40%,70%{transform:rotate(30deg)}}
+@keyframes twave{50%{transform:rotate(-75deg)}}
+@keyframes tspin{25%{transform:scaleX(0) translateY(-6%)}50%{transform:scaleX(-1) translateY(-10%)}75%{transform:scaleX(0) translateY(-6%)}100%{transform:scaleX(1)}}
+@keyframes thop{40%{transform:translateY(-35%) rotate(-6deg)}70%{transform:translateY(0)}85%{transform:translateY(-8%)}}
+@keyframes ttuck{30%,55%{transform:rotate(40deg)}}
+@keyframes tdance{25%{transform:translateX(-5%) rotate(-5deg)}75%{transform:translateX(5%) rotate(5deg)}}
+@keyframes squish{50%{transform:scale(1.06,.94)}}
+
+/* words */
+.wTop{display:flex;align-items:center;gap:12px;margin-top:64px}
+.bubble{position:relative;background:#fff;border-radius:26px;padding:8px 22px;font-size:clamp(40px,11vmin,76px);font-weight:900;color:#7e22ce;display:flex;align-items:center;gap:12px;box-shadow:0 5px 0 #e879f9;letter-spacing:1px}
+.bubble::before{content:"";position:absolute;left:-18px;top:50%;margin-top:-12px;border:12px solid transparent;border-right:18px solid #fff;border-left:0}
+.bubble svg{width:38px;height:38px}
+.wStars{display:flex;gap:4px;margin:10px 0}
+.wStars svg{width:clamp(30px,8vmin,44px);height:clamp(30px,8vmin,44px)}
+.wStars .empty,.growRow .empty{opacity:.25;filter:grayscale(1)}
+.wCards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,3vmin,20px);width:100%;max-width:680px;margin:auto 0}
+@media (orientation:landscape){.wCards{grid-template-columns:repeat(4,minmax(0,1fr));max-width:980px}}
+.wcard .pic.sq{width:56%;transition:opacity .3s}
+.wcard .word{font-size:clamp(30px,8vmin,50px)}
+.wcard.right{border-color:#22c55e;background:#f0fdf4;animation:pulse .6s 2}
+.finishCard{grid-column:1/-1;display:flex;flex-direction:column;align-items:center}
+
+/* tricks */
+.pad{display:flex;gap:clamp(8px,3vmin,16px);margin:10px 0;min-height:8px;flex-wrap:wrap;justify-content:center}
+.padBtn{width:clamp(68px,18vmin,110px);height:clamp(68px,18vmin,110px);border-radius:26px;box-shadow:0 5px 0 #0003;display:grid;place-items:center;transition:transform .12s,filter .12s;border:4px solid #fff}
+.padBtn svg{width:68%;height:68%}
+.padBtn.lit{transform:scale(1.18);filter:brightness(1.1) drop-shadow(0 0 16px #fff)}
+.pad.watch .padBtn{pointer-events:none}
+.padBtn.shake{animation:shake .4s}
+.tCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:640px}
+@media (orientation:landscape){.tCards{grid-template-columns:repeat(6,minmax(0,1fr));max-width:980px}}
+.tcard .pic.sq{width:62%}
+.tcard.todo .pic{opacity:.55}
+.tcard .tag{position:absolute;top:6px;right:6px;width:28px;height:28px}
+.tcard .tag svg{width:100%;height:100%}
+
+/* pony show */
+#showOv{background:linear-gradient(#9bdcff 0,#d9f2ff 30%,#e8c387 30%,#d9a95e 100%);padding-top:0}
+.crowd{display:flex;gap:6px;justify-content:center;margin-top:calc(70px + var(--sat))}
+.crowd span{width:clamp(22px,5vmin,34px);height:clamp(22px,5vmin,34px);border-radius:50%;background:var(--c);border:3px solid #fff;animation:bob .6s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-6px)}}
+.rounds{display:flex;gap:12px;margin:10px 0}
+.rounds span{width:clamp(54px,13vmin,74px);height:clamp(54px,13vmin,74px);background:#fff;border-radius:50%;display:grid;place-items:center;opacity:.5;border:4px solid transparent}
+.rounds span svg{width:66%;height:66%}
+.rounds span.on{opacity:1;border-color:#a855f7;animation:pulse 1s infinite}
+.rounds span.done{opacity:1;border-color:#22c55e}
+.arena{position:relative;flex:1;width:100%;display:grid;place-items:end center;padding-bottom:7%;overflow:hidden;min-height:200px}
+.pbox.show{width:min(76vw,44vh,440px)}
+.glint{position:absolute;width:clamp(60px,14vmin,84px);height:clamp(60px,14vmin,84px);transform:translate(-50%,-50%);border-radius:50%;background:#fff8;border:4px dashed #facc15;animation:pulse 1s infinite;z-index:3}
+.glint svg{width:80%;height:80%}
+.fenceEl{position:absolute;bottom:6%;left:64%;width:min(22vw,18vh,150px);display:none;z-index:1}
+.fenceEl.on{display:block}
+.fenceEl.slide{animation:fenceslide 1s linear}
+@keyframes fenceslide{from{transform:translateX(0)}to{transform:translateX(-220%)}}
+.showjump .pony{animation:sjump 1s ease-in-out!important}
+@keyframes sjump{45%{transform:translateY(-45%) rotate(-8deg)}85%{transform:translateY(0) rotate(0)}}
+.parade{animation:parade 2s ease-in-out 2}
+@keyframes parade{25%{transform:translateX(-12%)}75%{transform:translateX(12%)}}
+.showMsg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:#fff9;z-index:4}
+.showMsg:not(:empty){display:flex}
+.roseBig{width:min(56vw,40vh,280px);animation:popin .8s}
+
+/* foal */
+.growRow{margin-top:calc(70px + var(--sat));display:flex;gap:4px;background:#fff;border-radius:999px;padding:6px 14px;box-shadow:0 4px 0 #e879f9}
+.growRow svg{width:clamp(28px,7vmin,40px);height:clamp(28px,7vmin,40px)}
+.foalBox{width:calc(min(84vw,46vh,480px) * var(--grow,.6));transition:width 1.2s;margin:auto 0}
+.fTiles{display:flex;gap:clamp(16px,6vmin,40px);align-items:flex-end;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+.fShoes{width:100%}
+.bottleFly{width:90px;height:90px;margin:-45px 0 0 -45px;transition:left 1s ease-in-out,top 1s ease-in-out,transform 1s}
+
+/* meadow */
+#meadowOv{padding:0;background:linear-gradient(#8fd3ff 0,#d8f1ff 52%,#6fd27a 52%,#3fb150 100%);overflow:hidden}
+#meadowOv.wx-rain{background:linear-gradient(#94a3b8 0,#e2e8f0 52%,#5fbf6c 52%,#3a9c4a 100%)}
+#meadowOv.m-winter,#meadowOv.wx-snow{background:linear-gradient(#a5c8e4 0,#eef6fc 52%,#f8fafc 52%,#dbe7f1 100%)}
+#meadowOv.m-autumn{background:linear-gradient(#8fd3ff 0,#d8f1ff 52%,#b6c95a 52%,#8fa83c 100%)}
+#meadowOv.m-autumn.wx-rain{background:linear-gradient(#94a3b8 0,#e2e8f0 52%,#a8bb52 52%,#7f9636 100%)}
+.hill{position:absolute;border-radius:50% 50% 0 0}
+.hill.h1{left:-20%;width:80%;top:36%;height:20%;background:#86e08f}
+.hill.h2{right:-25%;width:80%;top:39%;height:16%;background:#5cc96a}
+.m-autumn .hill.h1{background:#c5d36d}.m-autumn .hill.h2{background:#a9bd52}
+.m-winter .hill,.wx-snow .hill{background:#fff!important}
+.mTree{position:absolute;left:2%;top:14%;width:min(48vw,44vh,380px);aspect-ratio:1}
+.mTree>svg{width:100%;height:100%}
+.m-autumn .mTree circle[fill="#4ade80"]{fill:#f59e0b}
+.m-winter .mTree circle[fill="#4ade80"]{fill:#e2e8f0}
+.m-spring .mTree circle[fill="#4ade80"]{fill:#86efac}
+.mItem{position:absolute;width:clamp(56px,12vmin,84px);height:clamp(56px,12vmin,84px);transform:translate(-50%,-50%);z-index:3;filter:drop-shadow(0 3px 2px #0003)}
+.mItem svg{width:100%;height:100%}
+.mItem.flower{animation:sway 2.4s ease-in-out infinite}
+.bush{position:absolute;width:min(34vw,24vh,220px);aspect-ratio:100/60;z-index:2}
+.bush>svg{width:100%;height:100%}
+.bush .mItem{width:clamp(48px,10vmin,72px);height:clamp(48px,10vmin,72px)}
+.bush.b1{right:3%;top:44%}
+.bush.b2{left:50%;top:50%}
+.mPump{position:absolute;width:12vmin;z-index:2}
+.mPump.p1{left:30%;top:53%}.mPump.p2{left:40%;top:56%;width:9vmin}
+.mPony{position:absolute;left:4%;top:60%;width:min(34vw,24vh,240px);z-index:2}
+.basket{position:absolute;left:50%;bottom:calc(8px + var(--sab));transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:4px 14px 4px 6px;box-shadow:0 4px 0 #0002;z-index:5;font-weight:900;font-size:clamp(20px,5vmin,28px)}
+.basket.bump{animation:bump .4s}
+.basket .bk svg{width:clamp(44px,11vmin,60px);height:clamp(44px,11vmin,60px)}
+.basket .cnt{display:flex;align-items:center;gap:2px}
+.basket i svg{width:clamp(28px,7vmin,38px);height:clamp(28px,7vmin,38px);display:block}
+.wxLayer{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden}
+.wxLayer i{position:absolute;top:-5%;width:2px;height:18px;background:#3b82f6aa;animation:fall linear infinite}
+.wx-snow .wxLayer i{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 2px #94a3b8}
+@keyframes fall{to{transform:translateY(110vh)}}
+.topbtn.pulse{animation:pulse 1s infinite}
+
+/* weather check */
+#wxOv{justify-content:center;gap:10px}
+#wxOv.wx-rain{background:linear-gradient(#94a3b8,#cbd5e1)}
+#wxOv.wx-snow{background:linear-gradient(#bfdbfe,#f8fafc)}
+
+/* photo booth */
+.topbtn.right{left:auto;right:calc(10px + var(--sar))}
+.frame{position:relative;margin-top:calc(70px + var(--sat));width:min(92vw,60vh,580px);aspect-ratio:4/3;background:#312e81 center/cover;border:10px solid #fff;border-radius:18px;box-shadow:0 6px 18px #0003;display:grid;place-items:center;overflow:hidden;flex:0 0 auto}
+.frame .pbox{width:84%;margin-top:6%}
+.pRow{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap}
+.pRow .tile.small{--tile:clamp(56px,13vmin,80px)}
+.pRow .tile .word{font-size:clamp(14px,3.6vmin,20px)}
+.swatch{width:clamp(56px,13vmin,72px);height:clamp(56px,13vmin,72px);border-radius:50%;border:5px solid #fff;box-shadow:0 4px 0 #0002;display:grid;place-items:center;transition:transform .15s}
+.swatch svg{width:58%;height:58%}
+.swatch.on{border-color:#a855f7;transform:scale(1.12)}
+.bd-stars{background:#312e81}.bd-hearts{background:#fbcfe8}.bd-meadow{background:#86efac}.bd-rainbow{background:linear-gradient(135deg,#f87171,#facc15,#4ade80,#60a5fa,#c084fc)}
+.snap{width:clamp(84px,20vmin,110px);height:clamp(84px,20vmin,110px);border-radius:50%;background:#fff;box-shadow:0 6px 0 #be185d;display:grid;place-items:center;margin-left:8px;animation:pulse 1.4s infinite}
+.snap svg{width:72%;height:72%}
+.snap:active{transform:translateY(4px);box-shadow:0 2px 0 #be185d}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:60}
+.flash.go{animation:flash .7s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+.thumbFly{position:fixed;left:50%;top:40%;width:240px;transform:translate(-50%,-50%) rotate(-4deg);border:6px solid #fff;border-radius:10px;box-shadow:0 6px 16px #0004;transition:all .8s ease-in;z-index:61}
+.thumbFly.go{left:calc(100% - 50px);top:50px;width:40px;opacity:.5}
+#albumBtn.bump{animation:bump .4s}
+.albumGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,40vw,230px),1fr));gap:14px;width:100%;max-width:1000px;margin-top:10px}
+.ph img{width:100%;display:block;border-radius:10px;border:6px solid #fff;box-shadow:0 4px 0 #e879f9}
+.ph:nth-child(odd) img{transform:rotate(-1.5deg)}.ph:nth-child(even) img{transform:rotate(1.5deg)}
+.emptyAlbum{grid-column:1/-1;display:grid;place-items:center;padding:40px}
+.emptyAlbum svg{width:120px;opacity:.5}
+.lightbox{position:fixed;inset:0;background:#000c;display:none;place-items:center;z-index:5}
+.lightbox.show{display:grid}
+.lightbox img{max-width:94vw;max-height:84vh;border:8px solid #fff;border-radius:12px}

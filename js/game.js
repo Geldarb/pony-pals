@@ -16,6 +16,9 @@
     owned: [], equip: { mane: null, bow: false, saddle: false, bunting: false, flowers: false, lights: false },
     days: 0, cared: false, friends: { foal: false, bunny: false }, settings: { sound: true, voice: true, timer: 0 },
     timerEnd: 0, night: false, blanket: false,
+    // added in v2
+    v: 2, bag: { apple: 5, berry: 0, flower: 0 }, rosettes: [], showDay: '', foalCare: { days: 0, lastDay: '', fedDay: '', cuddleDay: '' },
+    tricks: {}, words: { rounds: 0 }, wear: null, prop: null, backdrop: 'stars',
   });
   let S = DEF();
   try {
@@ -23,13 +26,38 @@
     if (raw && typeof raw === 'object') {
       const d = DEF();
       S = Object.assign(d, raw);
-      ['needs', 'equip', 'friends', 'settings'].forEach(k => { S[k] = Object.assign(DEF()[k], raw[k] || {}); });
+      ['needs', 'equip', 'friends', 'settings', 'bag', 'foalCare', 'tricks', 'words'].forEach(k => {
+        S[k] = Object.assign(DEF()[k], raw[k] && typeof raw[k] === 'object' ? raw[k] : {});
+      });
+      if (!Array.isArray(S.rosettes)) S.rosettes = [];
+      for (const k in S.needs) if (typeof S.needs[k] !== 'number' || isNaN(S.needs[k])) S.needs[k] = 60;
+      if (typeof S.shoes !== 'number' || isNaN(S.shoes)) S.shoes = 3;
+      if (!Array.isArray(S.owned)) S.owned = [];
+      S.v = 2; // v1 saves simply gain the new fields above
     }
   } catch (e) { S = DEF(); }
   let noSave = false;
   function save() { if (noSave) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   SND.sound = S.settings.sound; SND.voice = S.settings.voice;
   const nm = () => S.name || 'your pony';
+  const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+
+  // ---------- Seasons & weather (from the real date) ----------
+  const Q = new URLSearchParams(location.search);
+  function seasonNow() {
+    const o = Q.get('season'); if (['spring', 'summer', 'autumn', 'winter'].includes(o)) return o;
+    const m = new Date().getMonth();
+    return m <= 1 || m === 11 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn';
+  }
+  function weatherNow() {
+    const o = Q.get('weather'); if (['sun', 'rain', 'snow'].includes(o)) return o;
+    const d = new Date(), seed = d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate();
+    let x = Math.sin(seed * 12.9898) * 43758.5453; x -= Math.floor(x);
+    const se = seasonNow();
+    if (se === 'winter') return x < 0.45 ? 'snow' : x < 0.65 ? 'rain' : 'sun';
+    if (se === 'summer') return x < 0.2 ? 'rain' : 'sun';
+    return x < 0.38 ? 'rain' : 'sun';
+  }
 
   // ---------- Needs ----------
   const HOUR = 3600e3;
@@ -58,7 +86,7 @@
   ponyWrap.innerHTML = ART.ponySVG();
   const pony = ponyWrap.querySelector('.pony');
   let mode = 'main', asleep = false;
-  const look = () => ({ coat: S.coat, mane: S.equip.mane, bow: S.equip.bow, saddle: S.equip.saddle, blanket: S.blanket });
+  const look = () => ({ coat: S.coat, mane: S.equip.mane, bow: S.equip.bow, saddle: S.equip.saddle, blanket: S.blanket, prop: S.prop });
   function mudCount() { const c = S.needs.clean; return c >= 75 ? 0 : Math.min(10, Math.round((75 - c) / 7) + 1); }
   function updateCues() {
     if (mode === 'groom') return;
@@ -73,6 +101,12 @@
     stage.classList.toggle('d-bunting', !!S.equip.bunting);
     stage.classList.toggle('d-flowers', !!S.equip.flowers);
     stage.classList.toggle('d-lights', !!S.equip.lights);
+    ['spring', 'summer', 'autumn', 'winter'].forEach(x => stage.classList.toggle('s-' + x, seasonNow() === x));
+    ['sun', 'rain', 'snow'].forEach(x => stage.classList.toggle('w-' + x, weatherNow() === x));
+    const R = ['#3b82f6', '#ef4444', '#facc15', '#22c55e', '#a855f7', '#f472b6'];
+    $('#rosettes').innerHTML = S.rosettes.slice(-8).map(r => `<span>${ART.rosette(R[r.c % R.length])}</span>`).join('');
+    const nf = Math.min(10, S.bag.flower || 0);
+    $('#floorFlowers').innerHTML = Array.from({ length: nf }, (_, i) => `<span style="left:${4 + ((i * 37) % 92)}%;--d:${(i % 3) * 0.4}s">${ICON.flower}</span>`).join('');
     renderFriends();
   }
   function friendLook() { return { coat: S.coat === 'golden' ? 'white' : 'golden', mane: null }; }
@@ -98,7 +132,7 @@
     Object.assign(ponyWrap.style, { width: w + 'px', height: h + 'px', left: left + 'px', top: top + 'px' });
     const bw = Math.max(54, w * 0.19), b = $('#bucket');
     Object.assign(b.style, { width: bw + 'px', left: Math.min(W - bw - 4, left + w * 0.9) + 'px', top: (H - bottom * 0.6 - bw * 0.875) + 'px' });
-    const fw = w * 0.48, f = $('#foal');
+    const fw = w * (0.36 + 0.045 * Math.min(7, S.foalCare.days || 0)), f = $('#foal');
     Object.assign(f.style, { width: fw + 'px', height: fw * ratio + 'px', left: Math.max(4, left - fw * 0.35) + 'px', top: (H - bottom * 0.3 - fw * ratio) + 'px', zIndex: 5 });
     const bnw = Math.max(48, w * 0.17), bn = $('#bunny');
     Object.assign(bn.style, { width: bnw + 'px', height: bnw + 'px', left: (left + w * 0.5) + 'px', top: (H - bnw - 4) + 'px', zIndex: 5 });
@@ -162,8 +196,14 @@
   }
   function renderBar() {
     let h = '';
-    if (mode === 'main') h = tile('apple', 'food', 'feed') + tile('brush', 'brush', 'groom') + tile('ball', 'play', 'play') + tile('bed', 'bed', 'bed') + tile('shop', 'shop', 'shop');
-    else if (mode === 'feed') h = tile('home', 'back', 'back', 'small') + ['apple', 'carrot', 'hay'].map(f => tile(f, f, 'food', 'food', `data-food="${f}"`)).join('');
+    if (mode === 'main') h = tile('apple', 'food', 'feed') + tile('brush', 'brush', 'groom') + tile('ball', 'play', 'play') + tile('bed', 'bed', 'bed') + tile('map', 'more', 'more', 'glowmore');
+    else if (mode === 'feed') {
+      const foods = ['apple', 'carrot', 'hay'].concat(S.bag.berry > 0 ? ['berry'] : []);
+      h = tile('home', 'back', 'back', 'small') + foods.map(f => {
+        const n = f === 'apple' || f === 'berry' ? S.bag[f] : -1;
+        return tile(f, f, 'food', 'food' + (n === 0 ? ' empty' : ''), `data-food="${f}"`).replace('</button>', n >= 0 ? `<span class="badge">${n}</span></button>` : '</button>');
+      }).join('');
+    }
     else if (mode === 'groom') h = tile('home', 'back', 'back', 'small') + tile('brush', 'brush', 'brushword', 'on') + tile('pebble', 'hoof', 'hoofword', groom && groom.step === 'hooves' ? 'on' : 'done');
     else if (mode === 'bed') {
       if (asleep) h = tile('sun', 'morning', 'morning', 'big glow');
@@ -191,7 +231,8 @@
     switch (a) {
       case 'feed': setMode('feed'); speakWord('food', `Drag some food to ${nm()}!`); break;
       case 'groom': startGroom(); break;
-      case 'play': speakWord('play'); startPlay(); break;
+      case 'play': speakWord('play', 'Pick a ride!'); MORE.ridePicker(); break;
+      case 'more': speakWord('more'); MORE.open(); break;
       case 'bed': startBed(); break;
       case 'shop': speakWord('shop'); openShop(); break;
       case 'back':
@@ -221,6 +262,7 @@
     try { btn.setPointerCapture(e.pointerId); } catch (_) {}
     btn.classList.add('pressed');
     const move = ev => {
+      if (btn.classList.contains('empty')) return;
       if (!drag && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 12) {
         drag = document.createElement('div'); drag.className = 'dragging'; drag.innerHTML = ICON[food];
         document.body.appendChild(drag); SFX.pop();
@@ -230,7 +272,11 @@
     const up = ev => {
       btn.removeEventListener('pointermove', move); btn.removeEventListener('pointerup', up); btn.removeEventListener('pointercancel', up);
       btn.classList.remove('pressed');
-      if (!drag) { SFX.tap(); speakWord(food); dragHint(food, btn); return; }
+      if (!drag) {
+        SFX.tap();
+        if (btn.classList.contains('empty')) { speakWord(food, `No ${food}s left. Let's pick some in the meadow!`); restart(btn, 'shake', 450); return; }
+        speakWord(food); dragHint(food, btn); return;
+      }
       if (ev.type === 'pointerup' && overPony(ev.clientX, ev.clientY)) { drag.remove(); feed(food); }
       else {
         const r = btn.getBoundingClientRect();
@@ -252,14 +298,16 @@
     setTimeout(() => { el.style.opacity = 0; }, 1600);
     setTimeout(() => el.remove(), 1950);
   }
-  const FOOD_LINES = { apple: 'Crunch crunch! Yummy apple!', carrot: 'Munch munch! I love carrots!', hay: 'Mmm, tasty hay!' };
+  const FOOD_LINES = { apple: 'Crunch crunch! Yummy apple!', carrot: 'Munch munch! I love carrots!', hay: 'Mmm, tasty hay!', berry: 'Sweet berries! My favourite!' };
   function feed(food) {
     const m = ponyPoint(362, 122);
     const el = fxAt('fly', m.x, m.y, food); el.style.transform = 'scale(1)';
     requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transform = 'scale(.1)'; el.style.opacity = 0; }));
     restart(pony, 'chew', 1900); SFX.crunch();
     if (S.needs.hunger >= 97) { say(`${nm()} is full! Thank you!`); hearts(3); return; }
-    S.needs.hunger = Math.min(100, S.needs.hunger + (food === 'hay' ? 28 : 22));
+    if (food === 'apple' || food === 'berry') { S.bag[food] = Math.max(0, S.bag[food] - 1); setTimeout(renderBar, 50); }
+    if (food === 'berry') hearts(4);
+    S.needs.hunger = Math.min(100, S.needs.hunger + (food === 'hay' ? 28 : food === 'berry' ? 18 : 22));
     cared(); earn(1, m); hearts(2);
     say(S.needs.hunger >= 97 ? `${FOOD_LINES[food]} ${nm()} is full and happy!` : FOOD_LINES[food]);
     renderHUD(); updateCues(); save();
@@ -340,6 +388,8 @@
     if (e.target.closest('#lantern') && mode === 'bed' && !asleep) { lanternOff(); return; }
     if (e.target.closest('#foal')) { SFX.neigh(); say('Hello, little foal!'); restart($('#foal'), 'happy', 1000); return; }
     if (e.target.closest('#bunny')) { SFX.boing(); say('Hop hop! Hello, bunny!'); return; }
+    if (e.target.closest('#rosettes') && mode === 'main') { const n = S.rosettes.length; SFX.ding(); speakWord('rosette', `${nm()} has won ${n} ${n === 1 ? 'rosette' : 'rosettes'}!`); return; }
+    if (e.target.closest('.win') && mode === 'main') { MORE.sayWeather(); return; }
     if ((mode === 'main' || mode === 'feed') && onPony(e)) { petPony(); lastPt = { x: e.clientX, y: e.clientY }; petDist = 0; }
     if (mode === 'bed' && asleep && onPony(e)) say('Shh! Sleeping.', { rate: 0.8 });
   });
@@ -355,6 +405,8 @@
     const now = Date.now(); if (now - lastPet < 1300) { hearts(1); return; }
     lastPet = now;
     SFX.neigh(); hearts(3); restart(pony, 'nod', 1500);
+    const learned = Object.keys(S.tricks).filter(k => S.tricks[k]);
+    if (learned.length && Math.random() < 0.35) { const t = learned[Math.floor(Math.random() * learned.length)]; setTimeout(() => MORE.perform(t, ponyWrap), 600); }
     const n = S.needs, low = Object.keys(n).sort((a, b) => n[a] - n[b])[0];
     if (n[low] >= 60) say(`${nm()} loves you!`);
     else if (low === 'hunger') { SFX.rumble(); say(`Rumble rumble! ${nm()} is hungry.`); }
@@ -531,7 +583,7 @@
     };
   }
 
-  // ---------- Ride mini-game ----------
+  // ---------- Ride mini-games: logs, beach, forest ----------
   const cv = $('#playCanvas'), cx = cv.getContext('2d'), rider = $('#rider');
   let P = null;
   function sizePlay() {
@@ -541,16 +593,20 @@
     Object.assign(P, { W, H, ground: H * 0.8, ph, pw, px: W * 0.08, speed: Math.max(W * 0.3, pw * 1.7), g: ph * 7.5, jv: ph * 3.7 });
     Object.assign(rider.style, { width: pw + 'px', height: ph + 'px', left: 0, top: 0 });
   }
-  function startPlay() {
+  const RIDE_INTRO = { logs: 'Tap to jump over the logs!', beach: 'Tap to jump into the waves! Splash!', forest: 'Tap to jump and catch the stars!' };
+  function startPlay(theme) {
+    theme = RIDE_INTRO[theme] ? theme : 'logs';
     const ov = $('#play');
-    rider.innerHTML = ART.ponySVG(); ART.applyLook(rider, look()); rider.classList.add('running');
-    P = { logs: [], next: 1.6, done: 0, total: 8, jumped: 0, y: 0, vy: 0, on: true, last: performance.now(), dist: 0, parts: [],
-      clouds: [0, 1, 2, 3].map(i => ({ x: i * 0.3 + Math.random() * 0.1, y: 0.08 + Math.random() * 0.2, s: 0.7 + Math.random() * 0.6 })) };
+    const lk = look(); lk.raincoat = S.wear === 'raincoat'; lk.blanket = S.wear === 'rug';
+    rider.innerHTML = ART.ponySVG(); ART.applyLook(rider, lk); rider.classList.add('running');
+    P = { theme, logs: [], next: 1.6, done: 0, total: theme === 'forest' ? 10 : 8, jumped: 0, y: 0, vy: 0, on: true, last: performance.now(), dist: 0, parts: [],
+      clouds: [0, 1, 2, 3].map(i => ({ x: i * 0.3 + Math.random() * 0.1, y: 0.08 + Math.random() * 0.2, s: 0.7 + Math.random() * 0.6 })),
+      wx: Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), s: 0.5 + Math.random() })) };
     sizePlay();
+    ov.className = 'overlay show ride-' + theme;
     $('#playCount').innerHTML = Array.from({ length: P.total }, () => `<span class="empty">${ICON.star}</span>`).join('');
     $('#tapHint').classList.remove('hide'); $('#finish').classList.remove('show');
-    ov.classList.add('show');
-    say('Tap to jump over the logs!');
+    say(RIDE_INTRO[theme]);
     requestAnimationFrame(loop);
   }
   function jump() {
@@ -562,32 +618,55 @@
     e.preventDefault(); jump();
   });
   $('#playHome').addEventListener('click', () => { SFX.tap(); endPlay(false); });
+  function burst(x, y, kind, n) {
+    for (let i = 0; i < n; i++) P.parts.push({ x, y, vx: (Math.random() - 0.5) * 320, vy: -180 - Math.random() * 280, life: 1, kind });
+  }
+  function gotStar(x, y) {
+    P.jumped++; SFX.ding();
+    const s = $('#playCount').children[P.jumped - 1]; if (s) s.classList.remove('empty');
+    burst(x, y, 'star', 10);
+  }
   function loop(t) {
     if (!P || !P.on) return;
     const dt = Math.min(0.05, (t - P.last) / 1000); P.last = t;
     P.dist += P.speed * dt;
-    // pony physics
-    if (P.y > 0 || P.vy > 0) { P.vy -= P.g * dt; P.y += P.vy * dt; if (P.y <= 0) { P.y = 0; P.vy = 0; SFX.clop(); } }
+    if (P.y > 0 || P.vy > 0) {
+      P.vy -= P.g * dt; P.y += P.vy * dt;
+      if (P.y <= 0) { P.y = 0; P.vy = 0; SFX.clop(); if (P.theme === 'beach') { burst(P.px + P.pw * 0.5, P.ground - 10, 'drop', 6); } }
+    }
     rider.classList.toggle('jumping', P.y > 4);
     rider.style.transform = `translate(${P.px}px,${P.ground - P.ph * 0.985 - P.y}px)`;
-    // logs
     P.next -= dt;
-    if (P.next <= 0 && P.logs.length + P.done < P.total) { P.logs.push({ x: P.W + 20, w: P.ph * 0.3, h: P.ph * 0.2, hit: false }); P.next = 2.1 + Math.random() * 0.9; }
+    if (P.next <= 0 && P.logs.length + P.done < P.total) {
+      if (P.theme === 'forest') {
+        const high = Math.random() < 0.6;
+        P.logs.push({ x: P.W + 20, w: P.ph * 0.28, h: P.ph * 0.28, alt: high ? P.ph * (0.95 + Math.random() * 0.35) : P.ph * 0.45 });
+        P.next = 1.3 + Math.random() * 0.8;
+      } else {
+        P.logs.push({ x: P.W + 20, w: P.ph * (P.theme === 'beach' ? 0.42 : 0.3), h: P.ph * (P.theme === 'beach' ? 0.24 : 0.2), hit: false });
+        P.next = 2.1 + Math.random() * 0.9;
+      }
+    }
     const fx0 = P.px + 0.2 * P.pw, fx1 = P.px + 0.74 * P.pw;
     P.logs.forEach(L => {
       L.x -= P.speed * dt;
-      if (!L.hit && L.x < fx1 && L.x + L.w > fx0 && P.y < L.h * 0.9) { L.hit = true; P.vy = Math.max(P.vy, P.ph * 2.4); SFX.boing(); }
-      if (!L.counted && L.x + L.w < fx0) {
-        L.counted = true; P.done++;
-        if (!L.hit) {
-          P.jumped++; SFX.ding();
-          const s = $('#playCount').children[P.jumped - 1]; if (s) s.classList.remove('empty');
-          for (let i = 0; i < 10; i++) P.parts.push({ x: L.x + L.w / 2, y: P.ground - L.h - 20, vx: (Math.random() - 0.5) * 300, vy: -200 - Math.random() * 250, life: 1 });
+      if (P.theme === 'forest') {
+        const sy = P.ground - L.alt, top = P.ground - P.ph - P.y, bot = P.ground - P.y;
+        if (!L.counted && L.x < P.px + 0.92 * P.pw && L.x + L.w > P.px + 0.15 * P.pw && sy > top - L.h * 0.3 && sy < bot) { L.counted = true; L.got = true; P.done++; gotStar(L.x, sy); }
+        if (!L.counted && L.x + L.w < P.px) { L.counted = true; P.done++; L.away = true; }
+      } else {
+        if (!L.hit && L.x < fx1 && L.x + L.w > fx0 && P.y < L.h * 0.9) {
+          L.hit = true; P.vy = Math.max(P.vy, P.ph * 2.4);
+          if (P.theme === 'beach') { SFX.whoosh(); burst(L.x + L.w / 2, P.ground - L.h, 'drop', 8); } else SFX.boing();
         }
-        if (P.done >= P.total) setTimeout(finishPlay, 900);
+        if (!L.counted && L.x + L.w < fx0) {
+          L.counted = true; P.done++;
+          if (!L.hit) { gotStar(L.x + L.w / 2, P.ground - L.h - 20); if (P.theme === 'beach') { SFX.whoosh(); burst(L.x + L.w / 2, P.ground - L.h, 'drop', 14); } }
+        }
       }
+      if (P.done >= P.total && !P.ending) { P.ending = true; setTimeout(finishPlay, 900); }
     });
-    P.logs = P.logs.filter(L => L.x + L.w > -50);
+    P.logs = P.logs.filter(L => L.x + L.w > -50 && !L.got);
     P.parts.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 500 * dt; p.life -= dt; });
     P.parts = P.parts.filter(p => p.life > 0);
     draw();
@@ -599,39 +678,87 @@
     cx.lineTo(W, H); cx.fill();
   }
   function drawStar(x, y, r, a) {
-    cx.save(); cx.globalAlpha = Math.max(0, a); cx.fillStyle = '#fde047'; cx.strokeStyle = '#ca8a04'; cx.lineWidth = 2;
+    cx.save(); cx.globalAlpha = Math.max(0, Math.min(1, a)); cx.fillStyle = '#fde047'; cx.strokeStyle = '#ca8a04'; cx.lineWidth = 2;
     cx.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * 0.45 : r, an = -Math.PI / 2 + i * Math.PI / 5; cx.lineTo(x + rr * Math.cos(an), y + rr * Math.sin(an)); }
     cx.closePath(); cx.fill(); cx.stroke(); cx.restore();
   }
-  function draw() {
-    const { W, H, ground } = P;
-    const sky = cx.createLinearGradient(0, 0, 0, ground); sky.addColorStop(0, '#7dd3fc'); sky.addColorStop(1, '#e0f7ff');
+  function cloudsSun(W, H, ground) {
+    const wet = weatherNow() !== 'sun';
+    const sky = cx.createLinearGradient(0, 0, 0, ground);
+    sky.addColorStop(0, wet ? '#94a3b8' : '#7dd3fc'); sky.addColorStop(1, wet ? '#e2e8f0' : '#e0f7ff');
     cx.fillStyle = sky; cx.fillRect(0, 0, W, H);
-    cx.fillStyle = '#fde047'; cx.beginPath(); cx.arc(W * 0.85, H * 0.15, Math.min(W, H) * 0.07, 0, 7); cx.fill();
-    cx.fillStyle = '#fff';
+    if (!wet) { cx.fillStyle = '#fde047'; cx.beginPath(); cx.arc(W * 0.85, H * 0.15, Math.min(W, H) * 0.07, 0, 7); cx.fill(); }
+    cx.fillStyle = wet ? '#f1f5f9' : '#fff';
     P.clouds.forEach(c => {
       const x = ((c.x * W * 1.4 - P.dist * 0.08) % (W * 1.4) + W * 1.4) % (W * 1.4) - W * 0.2, y = c.y * H, s = c.s * Math.min(W, H) * 0.05;
       cx.beginPath(); cx.arc(x, y, s, 0, 7); cx.arc(x + s, y - s * 0.4, s * 1.2, 0, 7); cx.arc(x + s * 2.1, y, s * 0.9, 0, 7); cx.fill();
     });
-    hills(P.dist * 0.15, ground - H * 0.08, H * 0.12, '#a7e3a0', H, W);
-    hills(P.dist * 0.4 + 300, ground, H * 0.07, '#86d48a', H, W);
-    cx.fillStyle = '#6cc06f'; cx.fillRect(0, ground, W, H - ground);
-    cx.fillStyle = '#e2b46b'; cx.fillRect(0, ground - 4, W, H * 0.05);
-    // flowers on grass
-    for (let i = 0; i < 14; i++) {
-      const x = ((i * 137 - P.dist) % (W + 100) + W + 100) % (W + 100) - 50, y = ground + H * 0.08 + (i % 3) * H * 0.04;
-      cx.fillStyle = ['#f472b6', '#fde047', '#fff', '#c084fc'][i % 4]; cx.beginPath(); cx.arc(x, y, 6, 0, 7); cx.fill();
-      cx.fillStyle = '#f59e0b'; cx.beginPath(); cx.arc(x, y, 2.5, 0, 7); cx.fill();
+  }
+  function weatherFx(W, H) {
+    const w = weatherNow(); if (w === 'sun') return;
+    cx.save();
+    P.wx.forEach(d => {
+      if (w === 'rain') {
+        const x = ((d.x * W - P.dist * 0.3 + performance.now() * 0.05 * d.s) % W + W) % W, y = (d.y * H + performance.now() * 0.6 * d.s) % H;
+        cx.strokeStyle = '#3b82f6aa'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x - 4, y + 14); cx.stroke();
+      } else {
+        const x = ((d.x * W - P.dist * 0.2 + Math.sin(performance.now() / 800 + d.y * 9) * 20) % W + W) % W, y = (d.y * H + performance.now() * 0.06 * d.s) % H;
+        cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(x, y, 2.5 * d.s + 1, 0, 7); cx.fill();
+      }
+    });
+    cx.restore();
+  }
+  function draw() {
+    const { W, H, ground } = P, th = P.theme, se = seasonNow(), snowy = weatherNow() === 'snow' || se === 'winter';
+    cloudsSun(W, H, ground);
+    if (th === 'beach') {
+      cx.fillStyle = '#38bdf8'; cx.fillRect(0, ground - H * 0.2, W, H * 0.2);
+      cx.strokeStyle = '#ffffffcc'; cx.lineWidth = 3;
+      for (let r = 0; r < 3; r++) { cx.beginPath(); for (let x = 0; x <= W + 20; x += 20) cx.lineTo(x, ground - H * (0.16 - r * 0.05) + 4 * Math.sin((x + P.dist * (0.2 + r * 0.15)) / 30)); cx.stroke(); }
+      cx.fillStyle = '#fcd34d'; cx.fillRect(0, ground - 4, W, H - ground + 4);
+      cx.fillStyle = '#fbbf24';
+      for (let i = 0; i < 16; i++) { const x = ((i * 113 - P.dist) % (W + 60) + W + 60) % (W + 60) - 30; cx.beginPath(); cx.arc(x, ground + H * 0.06 + (i % 4) * H * 0.03, 3, 0, 7); cx.fill(); }
+      for (let i = 0; i < 4; i++) { const x = ((i * 290 + 80 - P.dist) % (W + 100) + W + 100) % (W + 100) - 50, y = ground + H * 0.1 + (i % 2) * H * 0.04; cx.fillStyle = i % 2 ? '#f472b6' : '#fb923c'; cx.beginPath(); cx.moveTo(x, y - 9); for (let k = 1; k < 10; k++) { const r = k % 2 ? 4 : 10, a = -Math.PI / 2 + k * Math.PI / 5; cx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a)); } cx.fill(); }
+    } else if (th === 'forest') {
+      const tree = (x, base, h, col) => { cx.fillStyle = '#7c4a1e'; cx.fillRect(x - h * 0.05, base - h * 0.3, h * 0.1, h * 0.3); cx.fillStyle = col; for (let k = 0; k < 3; k++) { const ty = base - h * 0.25 - k * h * 0.22; cx.beginPath(); cx.moveTo(x - h * (0.3 - k * 0.07), ty); cx.lineTo(x + h * (0.3 - k * 0.07), ty); cx.lineTo(x, ty - h * 0.35); cx.fill(); } };
+      for (let i = 0; i < 9; i++) { const x = ((i * 170 - P.dist * 0.3) % (W + 200) + W + 200) % (W + 200) - 100; tree(x, ground - H * 0.02, H * 0.45, snowy ? '#a7c4b5' : '#4d9a5b'); }
+      for (let i = 0; i < 6; i++) { const x = ((i * 260 + 90 - P.dist * 0.7) % (W + 300) + W + 300) % (W + 300) - 150; tree(x, ground + 4, H * 0.6, snowy ? '#cfe3d6' : se === 'autumn' ? (i % 2 ? '#d97706' : '#2f7d3f') : '#2f7d3f'); }
+      cx.fillStyle = snowy ? '#f1f5f9' : '#5b8c3a'; cx.fillRect(0, ground, W, H - ground);
+      cx.fillStyle = '#b08350'; cx.fillRect(0, ground - 4, W, H * 0.05);
+      for (let i = 0; i < 10; i++) { const x = ((i * 151 - P.dist) % (W + 100) + W + 100) % (W + 100) - 50, y = ground + H * 0.09 + (i % 3) * H * 0.03; cx.fillStyle = '#ef4444'; cx.beginPath(); cx.arc(x, y, 7, Math.PI, 0); cx.fill(); cx.fillStyle = '#fff'; cx.fillRect(x - 2, y, 4, 7); }
+    } else {
+      hills(P.dist * 0.15, ground - H * 0.08, H * 0.12, snowy ? '#e2e8f0' : se === 'autumn' ? '#c7d98a' : '#a7e3a0', H, W);
+      hills(P.dist * 0.4 + 300, ground, H * 0.07, snowy ? '#f1f5f9' : se === 'autumn' ? '#a3c46a' : '#86d48a', H, W);
+      cx.fillStyle = snowy ? '#f8fafc' : '#6cc06f'; cx.fillRect(0, ground, W, H - ground);
+      cx.fillStyle = '#e2b46b'; cx.fillRect(0, ground - 4, W, H * 0.05);
+      for (let i = 0; i < 14; i++) {
+        const x = ((i * 137 - P.dist) % (W + 100) + W + 100) % (W + 100) - 50, y = ground + H * 0.08 + (i % 3) * H * 0.04;
+        if (se === 'autumn' && i % 3 === 0) { cx.fillStyle = '#f97316'; cx.beginPath(); cx.ellipse(x, y, 11, 8, 0, 0, 7); cx.fill(); cx.fillStyle = '#166534'; cx.fillRect(x - 1, y - 12, 3, 5); continue; }
+        cx.fillStyle = ['#f472b6', '#fde047', '#fff', '#c084fc'][i % 4]; cx.beginPath(); cx.arc(x, y, 6, 0, 7); cx.fill();
+        cx.fillStyle = '#f59e0b'; cx.beginPath(); cx.arc(x, y, 2.5, 0, 7); cx.fill();
+      }
     }
     P.logs.forEach(L => {
+      if (th === 'forest') { drawStar(L.x + L.w / 2, P.ground - L.alt, L.w / 2 + 3 * Math.sin(performance.now() / 150), L.away ? 0.4 : 1); return; }
       const y = ground - L.h;
+      if (th === 'beach') {
+        cx.fillStyle = '#0ea5e9'; cx.strokeStyle = '#0c4a6e'; cx.lineWidth = 3;
+        cx.beginPath(); cx.moveTo(L.x, ground); cx.quadraticCurveTo(L.x + L.w * 0.3, y - L.h * 0.3, L.x + L.w * 0.75, y + L.h * 0.1);
+        cx.quadraticCurveTo(L.x + L.w * 0.55, y + L.h * 0.35, L.x + L.w * 0.7, y + L.h * 0.5); cx.quadraticCurveTo(L.x + L.w, ground - 6, L.x + L.w * 1.1, ground); cx.closePath(); cx.fill(); cx.stroke();
+        cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(L.x + L.w * 0.72, y + L.h * 0.12, L.h * 0.14, 0, 7); cx.arc(L.x + L.w * 0.6, y + L.h * 0.05, L.h * 0.1, 0, 7); cx.fill();
+        return;
+      }
       cx.fillStyle = '#9a6233'; cx.strokeStyle = '#4a2e1d'; cx.lineWidth = 4;
       cx.beginPath(); cx.roundRect ? cx.roundRect(L.x, y, L.w, L.h, L.h / 2) : cx.rect(L.x, y, L.w, L.h); cx.fill(); cx.stroke();
       cx.fillStyle = '#e0b07a'; cx.beginPath(); cx.ellipse(L.x + L.h * 0.35, y + L.h / 2, L.h * 0.32, L.h * 0.45, 0, 0, 7); cx.fill(); cx.stroke();
       cx.strokeStyle = '#9a6233'; cx.lineWidth = 2; cx.beginPath(); cx.ellipse(L.x + L.h * 0.35, y + L.h / 2, L.h * 0.14, L.h * 0.2, 0, 0, 7); cx.stroke();
       cx.fillStyle = '#4ade80'; cx.beginPath(); cx.ellipse(L.x + L.w * 0.7, y + 2, 8, 4, -0.4, 0, 7); cx.fill();
     });
-    P.parts.forEach(p => drawStar(p.x, p.y, 10, p.life));
+    P.parts.forEach(p => {
+      if (p.kind === 'drop') { cx.globalAlpha = Math.max(0, p.life); cx.fillStyle = '#7dd3fc'; cx.beginPath(); cx.arc(p.x, p.y, 6, 0, 7); cx.fill(); cx.globalAlpha = 1; }
+      else drawStar(p.x, p.y, 10, p.life);
+    });
+    weatherFx(W, H);
   }
   function finishPlay() {
     if (!P || !P.on) return;
@@ -639,7 +766,8 @@
     const f = $('#finish'), n = P.jumped;
     f.innerHTML = `<div class="stars">${n ? Array.from({ length: n }, (_, i) => `<span style="animation-delay:${i * 0.12}s">${ICON.star}</span>`).join('') : ICON.heart}</div><button class="go pulse" aria-label="home">${ICON.tick}</button>`;
     f.classList.add('show'); SFX.cheer();
-    say(n ? `Wheee! You jumped ${n} logs! ${nm()} had so much fun!` : `Wheee! What a lovely ride! ${nm()} had so much fun!`);
+    const what = { logs: `You jumped ${n} logs!`, beach: `You made ${n} big splashes!`, forest: `You caught ${n} stars!` }[P.theme];
+    say(n ? `Wheee! ${what} ${nm()} had so much fun!` : `Wheee! What a lovely ride! ${nm()} had so much fun!`);
     f.querySelector('.go').onclick = () => { SFX.tap(); endPlay(true); };
   }
   function endPlay(finished) {
@@ -729,6 +857,11 @@
     if (++ticks % 10 === 0) save();
     checkTimer();
   }, 1000);
+
+  // Shared with more.js (extra activities)
+  window.PP = { S, save, earn, say, speakWord, look, renderAll, renderHUD, renderPony, renderStable, renderBar, layout, ponyPoint, cared, hearts,
+    sparkles, restart, nm, fxAt, startPlay, openShop, holdGate, todayKey, seasonNow, weatherNow, friendLook, get mode() { return mode; } };
+  MORE.init();
 
   // Start
   if (S.night) { asleep = true; mode = 'bed'; stage.classList.add('night', 'dark'); startZz(); }
