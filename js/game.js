@@ -26,7 +26,8 @@
       ['needs', 'equip', 'friends', 'settings'].forEach(k => { S[k] = Object.assign(DEF()[k], raw[k] || {}); });
     }
   } catch (e) { S = DEF(); }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  let noSave = false;
+  function save() { if (noSave) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   SND.sound = S.settings.sound; SND.voice = S.settings.voice;
   const nm = () => S.name || 'your pony';
 
@@ -91,8 +92,9 @@
   function layout() {
     const sr = stage.getBoundingClientRect(), W = sr.width, H = sr.height;
     const ratio = VB.h / VB.w;
-    const w = Math.max(120, Math.min(W * 0.76, (H * 0.72) / ratio, 640)), h = w * ratio;
-    const bottom = H * 0.05, left = (W - w) / 2, top = H - h - bottom;
+    const portrait = H > W * 1.1;
+    const w = Math.max(120, Math.min(W * (portrait ? 0.95 : 0.76), (H * 0.72) / ratio, 640)), h = w * ratio;
+    const bottom = H * (portrait ? 0.09 : 0.05), left = (W - w) / 2, top = H - h - bottom;
     Object.assign(ponyWrap.style, { width: w + 'px', height: h + 'px', left: left + 'px', top: top + 'px' });
     const bw = Math.max(54, w * 0.19), b = $('#bucket');
     Object.assign(b.style, { width: bw + 'px', left: Math.min(W - bw - 4, left + w * 0.9) + 'px', top: (H - bottom * 0.6 - bw * 0.875) + 'px' });
@@ -686,7 +688,7 @@
       const s = e.target.closest('[data-set]');
       if (s) { st[s.dataset.set] = !st[s.dataset.set]; SND.sound = st.sound; SND.voice = st.voice; save(); openParent(); return; }
       if (e.target.closest('#ppSave')) { const v = $('#ppName').value.trim().slice(0, 14); if (v) { S.name = v; save(); say(`Hello, ${v}!`); } return; }
-      if (e.target.closest('#ppReset')) { if (confirm('Reset Pony Pals? This deletes all progress on this device.')) { localStorage.removeItem(KEY); location.reload(); } return; }
+      if (e.target.closest('#ppReset')) { if (confirm('Reset Pony Pals? This deletes all progress on this device.')) { noSave = true; localStorage.removeItem(KEY); location.reload(); } return; }
       if (e.target.closest('#ppClose')) { ov.classList.remove('show'); }
     };
   }
