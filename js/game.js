@@ -17,8 +17,10 @@
     days: 0, cared: false, friends: { foal: false, bunny: false }, settings: { sound: true, voice: true, timer: 0 },
     timerEnd: 0, night: false, blanket: false,
     // added in v2
-    v: 2, bag: { apple: 5, berry: 0, flower: 0 }, rosettes: [], showDay: '', foalCare: { days: 0, lastDay: '', fedDay: '', cuddleDay: '' },
+    v: 3, bag: { apple: 5, berry: 0, flower: 0 }, rosettes: [], showDay: '', foalCare: { days: 0, lastDay: '', fedDay: '', cuddleDay: '' },
     tricks: {}, words: { rounds: 0 }, wear: null, prop: null, backdrop: 'stars',
+    // added in v3
+    visitors: { met: {}, day: '', done: '' }, games: { count: 0, colour: 0 }, vet: { day: '', count: 0 },
   });
   let S = DEF();
   try {
@@ -26,14 +28,15 @@
     if (raw && typeof raw === 'object') {
       const d = DEF();
       S = Object.assign(d, raw);
-      ['needs', 'equip', 'friends', 'settings', 'bag', 'foalCare', 'tricks', 'words'].forEach(k => {
+      ['needs', 'equip', 'friends', 'settings', 'bag', 'foalCare', 'tricks', 'words', 'visitors', 'games', 'vet'].forEach(k => {
         S[k] = Object.assign(DEF()[k], raw[k] && typeof raw[k] === 'object' ? raw[k] : {});
       });
       if (!Array.isArray(S.rosettes)) S.rosettes = [];
       for (const k in S.needs) if (typeof S.needs[k] !== 'number' || isNaN(S.needs[k])) S.needs[k] = 60;
       if (typeof S.shoes !== 'number' || isNaN(S.shoes)) S.shoes = 3;
       if (!Array.isArray(S.owned)) S.owned = [];
-      S.v = 2; // v1 saves simply gain the new fields above
+      if (!S.visitors.met || typeof S.visitors.met !== 'object') S.visitors.met = {};
+      S.v = 3; // older saves simply gain the new fields above
     }
   } catch (e) { S = DEF(); }
   let noSave = false;
@@ -862,6 +865,7 @@
   window.PP = { S, save, earn, say, speakWord, look, renderAll, renderHUD, renderPony, renderStable, renderBar, layout, ponyPoint, cared, hearts,
     sparkles, restart, nm, fxAt, startPlay, openShop, holdGate, todayKey, seasonNow, weatherNow, friendLook, get mode() { return mode; } };
   MORE.init();
+  if (window.MORE3) MORE3.init();
 
   // Start
   if (S.night) { asleep = true; mode = 'bed'; stage.classList.add('night', 'dark'); startZz(); }

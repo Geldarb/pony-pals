@@ -1,6 +1,6 @@
 /* Offline support: network first, falling back to the saved copy. */
-const CACHE = 'pony-pals-v2.0';
-const FILES = ['./', 'index.html', 'style.css?v=2.0', 'js/art.js?v=2.0', 'js/audio.js?v=2.0', 'js/more.js?v=2.0', 'js/game.js?v=2.0', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+const CACHE = 'pony-pals-v3.0';
+const FILES = ['./', 'index.html', 'style.css?v=3.0', 'js/art.js?v=3.0', 'js/audio.js?v=3.0', 'js/more.js?v=3.0', 'js/more3.js?v=3.0', 'js/game.js?v=3.0', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

@@ -93,6 +93,12 @@
     shutter() { noise(0.05, { freq: 3000, vol: 0.5 }); noise(0.08, { freq: 1500, vol: 0.4, delay: 0.07 }); tone(1800, 0.05, { vol: 0.1, type: 'square' }); },
     note(i) { const f = [523, 659, 784, 1046, 880, 587][i % 6]; tone(f, 0.35, { vol: 0.22, type: 'triangle' }); },
     aww() { tone(700, 0.5, { slideTo: 420, vol: 0.12, type: 'triangle' }); },
+    heart() { for (let i = 0; i < 4; i++) { tone(70, 0.14, { delay: i * 0.8, vol: 0.6 }); tone(60, 0.16, { delay: i * 0.8 + 0.22, vol: 0.5 }); } },
+    knock() { [0, 0.22, 0.6, 0.82].forEach(d => { noise(0.07, { delay: d, freq: 300, q: 2, vol: 0.9 }); tone(110, 0.08, { delay: d, vol: 0.3 }); }); },
+    pour() { noise(1.1, { freq: 900, q: 0.7, vol: 0.18 }); for (let i = 0; i < 6; i++) tone(500 + i * 60, 0.08, { delay: 0.1 + i * 0.15, vol: 0.06 }); },
+    gurgle() { for (let i = 0; i < 5; i++) tone(180 + Math.random() * 120, 0.18, { delay: i * 0.2, slideTo: 90 + Math.random() * 80, vol: 0.2 }); },
+    giggle() { [880, 990, 880, 1046, 880].forEach((f, i) => tone(f, 0.09, { delay: i * 0.1, vol: 0.12, type: 'triangle' })); },
+    beep() { [0, 0.3, 0.6].forEach(d => tone(2000, 0.12, { delay: d, vol: 0.12, type: 'square' })); },
     clop() { tone(900, 0.04, { vol: 0.12, type: 'square' }); tone(700, 0.04, { vol: 0.1, type: 'square', delay: 0.09 }); },
   };
 

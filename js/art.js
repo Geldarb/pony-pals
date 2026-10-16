@@ -188,7 +188,7 @@
   const MANES = { pink: '#ff8fc7', blue: '#6fb7ff', gold: '#ffd34d', rainbow: 'url(#g-rainbow)' };
 
   function applyLook(el, look) {
-    const c = COATS[look.coat] || COATS.brown;
+    const c = COATS[look.coat] || (window.ART && ART.VCOATS && ART.VCOATS[look.coat]) || COATS.brown;
     el.style.setProperty('--coat', c.coat);
     el.style.setProperty('--coatd', c.coatd);
     el.style.setProperty('--muz', c.muz);

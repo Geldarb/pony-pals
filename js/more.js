@@ -35,6 +35,8 @@
   const MENU = [
     ['words', 'words', () => words()], ['show', 'rosette', () => weatherCheck(show)], ['foal', 'bottle', () => foal()],
     ['meadow', 'tree', () => weatherCheck(meadow)], ['photo', 'camera', () => photo()], ['tricks', 'wand', () => tricks()],
+    ['visitor', 'door', () => MORE3.visit()], ['count', 'numbers', () => MORE3.counting()], ['colours', 'palette', () => MORE3.colours()],
+    ['vet', 'stetho', () => MORE3.vet()], ['friends', 'friends', () => MORE3.friends()],
     ['shop', 'shop', () => G().openShop()],
   ];
   function open() {
