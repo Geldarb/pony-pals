@@ -117,7 +117,7 @@
     if (!k) {
       const b = document.createElement('button'); b.id = 'knock'; b.setAttribute('aria-label', 'visitor at the door');
       b.innerHTML = ICON.door; document.getElementById('stage').appendChild(b);
-      b.addEventListener('pointerdown', e => { e.stopPropagation(); SFX.tap(); visit(); });
+      b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); SFX.tap(); visit(); });
     }
     if (!knockShown) { knockShown = true; SFX.knock(); setTimeout(() => say('Knock knock! Someone is at the door! Tap the door.'), 1100); }
   }
@@ -217,12 +217,13 @@
     ponyBox($('#rMine'), G().look()); ponyBox($('#rGuest'), vLook(v));
     $('#rMine').classList.add('running'); $('#rGuest').classList.add('running');
     let me = 0, them = 0, done = false;
+    const place = (sel, p) => { const el = $(sel); if (!el) return; const tw = el.parentNode.clientWidth - el.offsetWidth; el.style.left = Math.max(0, tw * p / 100) + 'px'; };
     say(`A friendly race! Tap the button fast to gallop. Ready, steady, go!`);
     const tick = setInterval(() => {
       if (done) return clearInterval(tick);
       them = Math.min(100, them + 1.6 + Math.random() * 0.8);
       if (them > me + 15) them = me + 15; // the friend never runs off without you
-      $('#rGuest').style.left = them * 0.78 + '%';
+      place('#rGuest', them);
       if (them >= 100 && me >= 100) finish();
     }, 120);
     function finish() {
@@ -233,8 +234,8 @@
     ov.onclick = e => {
       if (e.target.closest('[data-x="close"]')) { done = true; SFX.tap(); close(ov); return; }
       if (e.target.closest('[data-r="go"]') && !done) {
-        me = Math.min(100, me + 9); SFX.clop(); $('#rMine').style.left = me * 0.78 + '%';
-        if (me >= 100) { them = Math.max(them, 96); setTimeout(() => { them = 100; $('#rGuest').style.left = '78%'; finish(); }, 500); }
+        me = Math.min(100, me + 9); SFX.clop(); place('#rMine', me);
+        if (me >= 100) { them = Math.max(them, 96); setTimeout(() => { them = 100; place('#rGuest', 100); finish(); }, 500); }
       }
     };
   }
@@ -244,12 +245,16 @@
     m.times++; st.visitors.met[v.id] = m; st.visitors.done = today; G().cared();
     if (!paid) reward(3); else G().save();
     ov.querySelector('#vChoices') && (ov.querySelector('#vChoices').innerHTML = '');
-    ov.querySelector('#vScene').innerHTML = `<div class="pbox vMine" id="bMine"></div><div class="bigHeart">${ICON.heart}</div><div class="pbox vGuest faceLeft" id="bGuest"></div>`;
+    ov.querySelector('#vScene').classList.add('bf'); ov.querySelector('#vScene').innerHTML = `<div class="pbox vMine" id="bMine"></div><div class="bigHeart">${ICON.heart}</div><div class="pbox vGuest faceLeft" id="bGuest"></div>`;
     ponyBox($('#bMine'), G().look()); ponyBox($('#bGuest'), vLook(v));
     $('#vChoices').innerHTML = `${paid ? '' : shoeRow(3)}<button class="go pulse" data-x="friends" aria-label="friends">${ICON.tick}</button>`;
+    ov.onclick = e => {
+      if (e.target.closest('[data-x="close"]')) { SFX.tap(); close(ov); return; }
+      if (e.target.closest('[data-x="friends"]')) { SFX.tap(); close(ov); friends(); }
+    };
     SFX.cheer();
     say(`${line} ${first ? `${v.name} is your friend now! ${v.name}'s picture is on your friends page.` : `${v.name} loves visiting you!`}${paid ? '' : ' Here are three horseshoes!'}`);
-    vSay && setTimeout(() => vSay(v, `Bye bye! See you again soon!`), 6500);
+    setTimeout(() => { if (document.getElementById('bGuest')) vSay(v, 'Bye bye! See you again soon!'); }, 6500);
   }
   function friends() {
     const ov = overlay('friendsOv'), met = S().visitors.met;
@@ -393,7 +398,7 @@
     const ov = overlay('vetOv'), st = S(), today = G().todayKey();
     let i = 0, armed = false, busy = false;
     ov.innerHTML = `${homeBtn()}<div class="vetSign">${ICON.heart}</div>
-      <div class="vetStage"><div class="pbox vetPony" id="vetPony"></div><div class="vetScale" id="vetScale">${ICON.scales}</div></div>
+      <div class="vetStage"><div class="pbox vetPony" id="vetPony"></div><div class="vetScale" id="vetScale"><svg viewBox="0 0 200 40"><rect x="4" y="8" width="192" height="28" rx="12" fill="#e2e8f0" stroke="#475569" stroke-width="4"/><circle cx="100" cy="22" r="11" fill="#fff" stroke="#475569" stroke-width="3"/><path class="needle" d="M100 22l7-6" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></svg></div></div>
       <div class="vetTools" id="vetTools">${STEPS.map((s, k) => `<button class="tile small" data-k="${k}"><span class="ico">${ICON[s.tool]}</span><span class="word dark">${s.word}</span></button>`).join('')}</div>`;
     const vp = $('#vetPony'); ponyBox(vp, G().look());
     const stage = ov.querySelector('.vetStage');
